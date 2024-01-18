@@ -1,0 +1,109 @@
+#!/usr/bin/env node
+
+import fs from "node:fs/promises";
+import path from "node:path";
+import upyun from "upyun";
+
+const [BUCKET, DIRECTORY] = process.argv.slice(2);
+const { UPYUN_OPERATOR, UPYUN_PASSWORD } = process.env;
+
+if (!BUCKET || !DIRECTORY) {
+	console.error("Usage: upyun-uploader <bucket> <directory>");
+	process.exit(1);
+}
+if (!UPYUN_OPERATOR || !UPYUN_PASSWORD) {
+	console.error("Missing UPYUN credentials in environment variables");
+	if (!UPYUN_OPERATOR) {
+		console.error("UPYUN_OPERATOR is not set");
+	}
+	if (!UPYUN_PASSWORD) {
+		console.error("UPYUN_PASSWORD is not set");
+	}
+	process.exit(1);
+}
+
+const service = new upyun.Service(
+	BUCKET,
+	UPYUN_OPERATOR,
+	UPYUN_PASSWORD,
+);
+const client = new upyun.Client(service);
+const filesToUpload: string[] = [];
+
+async function readLocalDir(dir: string): Promise<void> {
+	try {
+		const files = await fs.readdir(dir);
+		for (const file of files) {
+			const filename = path.join(dir, file);
+			const stat = await fs.stat(filename);
+			if (stat.isDirectory()) {
+				await readLocalDir(filename);
+			} else if (stat.isFile()) {
+				filesToUpload.push(filename);
+			}
+		}
+	} catch (error) {
+		console.error("Failed to read local files in", dir);
+		console.error(error);
+		process.exit(1);
+	}
+}
+
+async function cleanRemoteDir(dir: string): Promise<void> {
+	try {
+		const response = await client.listDir(dir);
+		if (!response) {
+			console.error("Failed to list remote files in", dir);
+			process.exit(1);
+		}
+		for (const file of response.files) {
+			const remotePath = path.join(dir, file.name).replace(/^\//, "");
+			console.info("Checking", remotePath);
+			if (file.type === "N") { // is file
+				if (!filesToUpload.includes(remotePath)) {
+					console.info("Deleting", remotePath);
+					await client.deleteFile(remotePath);
+				}
+			} else if (file.type === "F") { // is directory
+				await cleanRemoteDir(file.name);
+			} else {
+				console.error("Unknown file type", file);
+				process.exit(1);
+			}
+		}
+	} catch (error) {
+		console.error("Failed to clean remote files in", dir);
+		console.error(error);
+		process.exit(1);
+	}
+}
+
+void (async (): Promise<void> => {
+	try {
+		await readLocalDir(DIRECTORY);
+		if (filesToUpload.length === 0) {
+			console.error("No files to upload");
+			process.exit(1);
+		}
+
+		for (let i = 0; i < filesToUpload.length; i++) {
+			const file = filesToUpload[i];
+			const filenameParts = file.split(path.sep);
+			const key = filenameParts.slice(1).join("/");
+			console.info("Uploading", key);
+			const fileContent = await fs.readFile(file);
+			await client.putFile(key, fileContent);
+			filesToUpload[i] = key;
+		}
+		console.info("All files uploaded!");
+
+		console.info("Cleaning up");
+		await cleanRemoteDir("/");
+		console.info("All done!");
+		process.exit(0);
+	} catch (error) {
+		console.error("Failed to deploy");
+		console.error(error);
+		process.exit(1);
+	}
+})();
