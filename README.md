@@ -9,7 +9,7 @@ The content in the bucket will be completely replaced by the content in the sele
 Install UPYUN Uploader globally using npm with the following command:
 
 ```bash
-npm install -g upyun-uploader
+npm install -g @shangzhen/upyun-uploader
 ```
 
 ## Configuration
