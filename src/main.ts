@@ -22,32 +22,14 @@ if (!UPYUN_OPERATOR || !UPYUN_PASSWORD) {
 	process.exit(1);
 }
 
+const isDelayMode = process.argv.includes("--delay");
 const service = new upyun.Service(
 	BUCKET,
 	UPYUN_OPERATOR,
 	UPYUN_PASSWORD,
 );
 const client = new upyun.Client(service);
-const filesToUpload: string[] = [];
-
-async function readLocalDir(dir: string): Promise<void> {
-	try {
-		const files = await fs.readdir(dir);
-		for (const file of files) {
-			const filename = path.join(dir, file);
-			const stat = await fs.stat(filename);
-			if (stat.isDirectory()) {
-				await readLocalDir(filename);
-			} else if (stat.isFile()) {
-				filesToUpload.push(filename);
-			}
-		}
-	} catch (error) {
-		console.error("Failed to read local files in", dir);
-		console.error(error);
-		process.exit(1);
-	}
-}
+const uploadedKeys: string[] = [];
 
 async function cleanRemoteDir(dir: string): Promise<void> {
 	try {
@@ -60,12 +42,12 @@ async function cleanRemoteDir(dir: string): Promise<void> {
 			const remotePath = path.join(dir, file.name).replace(/^\//, "");
 			console.info("Checking", remotePath);
 			if (file.type === "N") { // is file
-				if (!filesToUpload.includes(remotePath)) {
+				if (!uploadedKeys.includes(remotePath)) {
 					console.info("Deleting", remotePath);
 					await client.deleteFile(remotePath);
 				}
 			} else if (file.type === "F") { // is directory
-				await cleanRemoteDir(file.name);
+				await cleanRemoteDir(remotePath);
 			} else {
 				console.error("Unknown file type", file);
 				process.exit(1);
@@ -78,22 +60,63 @@ async function cleanRemoteDir(dir: string): Promise<void> {
 	}
 }
 
+async function readLocalDir(dir: string, results: string[]): Promise<void> {
+	try {
+		const files = await fs.readdir(dir);
+		for (const file of files) {
+			const filename = path.join(dir, file);
+			const stat = await fs.stat(filename);
+			if (stat.isDirectory()) {
+				await readLocalDir(filename, results);
+			} else if (stat.isFile()) {
+				results.push(filename);
+			}
+		}
+	} catch (error) {
+		console.error("Failed to read local files in", dir);
+		console.error(error);
+		process.exit(1);
+	}
+}
+
+function sleep(delay: number): Promise<void> {
+	return new Promise((resolve) => {
+		setTimeout(resolve, delay);
+	});
+}
+
+async function uploadFile(filename: string): Promise<void> {
+	const filenameParts = filename.split(path.sep);
+	const key = filenameParts.slice(1).join("/");
+	console.info("Uploading", key);
+	const fileContent = await fs.readFile(filename);
+	await client.putFile(key, fileContent);
+	uploadedKeys.push(key);
+}
+
 void (async (): Promise<void> => {
 	try {
-		await readLocalDir(DIRECTORY);
+		const filesToUpload: string[] = [];
+		await readLocalDir(DIRECTORY, filesToUpload);
 		if (filesToUpload.length === 0) {
 			console.error("No files to upload");
 			process.exit(1);
 		}
 
-		for (let i = 0; i < filesToUpload.length; i++) {
-			const file = filesToUpload[i];
-			const filenameParts = file.split(path.sep);
-			const key = filenameParts.slice(1).join("/");
-			console.info("Uploading", key);
-			const fileContent = await fs.readFile(file);
-			await client.putFile(key, fileContent);
-			filesToUpload[i] = key;
+		const delayedFiles: string[] = [];
+		for (const filename of filesToUpload) {
+			if (isDelayMode && filename.endsWith(".html")) {
+				delayedFiles.push(filename);
+				continue;
+			}
+			await uploadFile(filename);
+		}
+		if (isDelayMode && delayedFiles.length > 0) {
+			console.info("Delay mode is enabled, waiting for 5 minutes");
+			await sleep(300_000);
+			for (const filename of delayedFiles) {
+				await uploadFile(filename);
+			}
 		}
 		console.info("All files uploaded!");
 
