@@ -21,7 +21,8 @@ if (!UPYUN_OPERATOR || !UPYUN_PASSWORD) {
 	}
 	process.exit(1);
 }
-if (path.resolve(DIRECTORY).split(path.sep).at(-1) === ".git") {
+const fullPath = path.resolve(DIRECTORY);
+if (fullPath.split(path.sep).at(-1) === ".git") {
 	console.error("Cannot upload .git directory");
 	process.exit(1);
 }
@@ -93,6 +94,10 @@ function sleep(delay: number): Promise<void> {
 }
 
 async function uploadFile(filename: string): Promise<void> {
+	if (!filename) {
+		console.error("Empty filename provided");
+		return;
+	}
 	const filenameParts = filename.split(path.sep);
 	const key = filenameParts.slice(1).join("/");
 	console.info("Uploading", key);
@@ -104,7 +109,7 @@ async function uploadFile(filename: string): Promise<void> {
 void (async (): Promise<void> => {
 	try {
 		const filesToUpload: string[] = [];
-		await readLocalDir(DIRECTORY, filesToUpload);
+		await readLocalDir(fullPath, filesToUpload);
 		if (filesToUpload.length === 0) {
 			console.error("No files to upload");
 			process.exit(1);
