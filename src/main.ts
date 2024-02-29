@@ -21,6 +21,10 @@ if (!UPYUN_OPERATOR || !UPYUN_PASSWORD) {
 	}
 	process.exit(1);
 }
+if (path.resolve(DIRECTORY).split(path.sep).at(-1) === ".git") {
+	console.error("Cannot upload .git directory");
+	process.exit(1);
+}
 
 const isDelayMode = process.argv.includes("--delay");
 const service = new upyun.Service(
@@ -67,6 +71,9 @@ async function readLocalDir(dir: string, results: string[]): Promise<void> {
 			const filename = path.join(dir, file);
 			const stat = await fs.stat(filename);
 			if (stat.isDirectory()) {
+				if (file === ".git") {
+					continue;
+				}
 				await readLocalDir(filename, results);
 			} else if (stat.isFile()) {
 				results.push(filename);
