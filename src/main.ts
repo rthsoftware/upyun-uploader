@@ -27,6 +27,7 @@ if (fullPath.split(path.sep).at(-1) === ".git") {
 	process.exit(1);
 }
 
+const cwd = process.cwd();
 const isDelayMode = process.argv.includes("--delay");
 const service = new upyun.Service(
 	BUCKET,
@@ -69,12 +70,12 @@ async function readLocalDir(dir: string, results: string[]): Promise<void> {
 	try {
 		const files = await fs.readdir(dir);
 		for (const file of files) {
+			if (file.startsWith(".")) {
+				continue;
+			}
 			const filename = path.join(dir, file);
 			const stat = await fs.stat(filename);
 			if (stat.isDirectory()) {
-				if (file === ".git") {
-					continue;
-				}
 				await readLocalDir(filename, results);
 			} else if (stat.isFile()) {
 				results.push(filename);
@@ -98,7 +99,7 @@ async function uploadFile(filename: string): Promise<void> {
 		console.error("Empty filename provided");
 		return;
 	}
-	const filenameParts = filename.split(path.sep);
+	const filenameParts = filename.substring(cwd.length).split(path.sep);
 	const key = filenameParts.slice(1).join("/");
 	console.info("Uploading", key);
 	const fileContent = await fs.readFile(filename);
@@ -108,6 +109,8 @@ async function uploadFile(filename: string): Promise<void> {
 
 void (async (): Promise<void> => {
 	try {
+		console.info("Current working directory:", cwd);
+
 		const filesToUpload: string[] = [];
 		await readLocalDir(fullPath, filesToUpload);
 		if (filesToUpload.length === 0) {
