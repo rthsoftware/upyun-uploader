@@ -99,7 +99,7 @@ async function uploadFile(filename: string): Promise<void> {
 		console.error("Empty filename provided");
 		return;
 	}
-	const filenameParts = filename.substring(cwd.length).split(path.sep);
+	const filenameParts = filename.substring(fullPath.length).split(path.sep);
 	const key = filenameParts.slice(1).join("/");
 	console.info("Uploading", key);
 	const fileContent = await fs.readFile(filename);
