@@ -7,6 +7,13 @@ import upyun from "upyun";
 const [BUCKET, DIRECTORY] = process.argv.slice(2);
 const { UPYUN_OPERATOR, UPYUN_PASSWORD } = process.env;
 
+if (process.argv.includes("--version")) {
+	const packageInfo = JSON.parse(
+		await fs.readFile(new URL("../package.json", import.meta.url), "utf8"),
+	) as { version: string; };
+	console.log(packageInfo.version);
+	process.exit(0);
+}
 if (!BUCKET || !DIRECTORY) {
 	console.error("Usage: upyun-uploader <bucket> <directory>");
 	process.exit(1);

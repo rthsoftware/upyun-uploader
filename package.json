@@ -1,6 +1,6 @@
 {
 	"name": "@shangzhen/upyun-uploader",
-	"version": "1.1.5",
+	"version": "1.1.6",
 	"description": "The command-line interface for uploading the selected directory to UPYUN Storage Service.",
 	"type": "module",
 	"main": "dist/main.js",
