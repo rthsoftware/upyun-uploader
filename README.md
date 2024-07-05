@@ -39,13 +39,13 @@ To integrate UPYUN Uploader with GitLab CI/CD, add the following configuration t
 
 ```yaml
 deploy:
-  stage: deploy
-  image: node:20-slim
-  script:
-    - npm install -g upyun-uploader
-    - upyun-uploader <bucket> <directory>
-  only:
-    - main
+    stage: deploy
+    image: node:20-slim
+    script:
+        - npm install -g upyun-uploader
+        - upyun-uploader <bucket> <directory>
+    only:
+        - main
 ```
 
 Replace the content in `<...>` with your own information.

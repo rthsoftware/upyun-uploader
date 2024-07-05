@@ -10,7 +10,7 @@ const { UPYUN_OPERATOR, UPYUN_PASSWORD } = process.env;
 if (process.argv.includes("--version")) {
 	const packageInfo = JSON.parse(
 		await fs.readFile(new URL("../package.json", import.meta.url), "utf8"),
-	) as { version: string; };
+	) as { version: string };
 	console.log(packageInfo.version);
 	process.exit(0);
 }
@@ -36,11 +36,7 @@ if (fullPath.split(path.sep).at(-1) === ".git") {
 
 const cwd = process.cwd();
 const isDelayMode = process.argv.includes("--delay");
-const service = new upyun.Service(
-	BUCKET,
-	UPYUN_OPERATOR,
-	UPYUN_PASSWORD,
-);
+const service = new upyun.Service(BUCKET, UPYUN_OPERATOR, UPYUN_PASSWORD);
 const client = new upyun.Client(service);
 const uploadedKeys: string[] = [];
 
@@ -54,12 +50,14 @@ async function cleanRemoteDir(dir: string): Promise<void> {
 		for (const file of response.files) {
 			const remotePath = path.join(dir, file.name).replace(/^\//, "");
 			console.info("Checking", remotePath);
-			if (file.type === "N") { // is file
+			if (file.type === "N") {
+				// is file
 				if (!uploadedKeys.includes(remotePath)) {
 					console.info("Deleting", remotePath);
 					await client.deleteFile(remotePath);
 				}
-			} else if (file.type === "F") { // is directory
+			} else if (file.type === "F") {
+				// is directory
 				await cleanRemoteDir(remotePath);
 			} else {
 				console.error("Unknown file type", file);
@@ -127,10 +125,10 @@ void (async (): Promise<void> => {
 
 		const delayedFiles: string[] = [];
 		for (const filename of filesToUpload) {
-			if (isDelayMode && (
-				filename.endsWith(".html") ||
-				filename === "sw.js"
-			)) {
+			if (
+				isDelayMode &&
+				(filename.endsWith(".html") || filename === "sw.js")
+			) {
 				delayedFiles.push(filename);
 				continue;
 			}
