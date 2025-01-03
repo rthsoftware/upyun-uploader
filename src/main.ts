@@ -12,8 +12,8 @@ const packageInfo = JSON.parse(
 ) as { version: string };
 const { version } = packageInfo;
 
-if (process.argv.includes("--version")) {
-	console.log(version);
+if (process.argv.includes("-v") || process.argv.includes("--version")) {
+	console.info(version);
 	process.exit(0);
 }
 console.info("UPYUN Uploader V" + version);
