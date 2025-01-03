@@ -1,6 +1,6 @@
 {
-	"name": "@shangzhen/upyun-uploader",
-	"version": "1.1.6",
+	"name": "upyun-uploader",
+	"version": "1.1.7",
 	"description": "The command-line interface for uploading the selected directory to UPYUN Storage Service.",
 	"type": "module",
 	"main": "dist/main.js",
@@ -9,7 +9,7 @@
 		"build": "tsc",
 		"clean": "rm -rf ./dist",
 		"format": "prettier --write .",
-		"lint": "eslint . --ext .ts && prettier --check .",
+		"lint": "eslint \"src/**/*.ts\" && prettier --check .",
 		"prepare": "npm run build",
 		"start": "npm run build && node ./dist/main.js"
 	},
@@ -35,19 +35,22 @@
 		"dist"
 	],
 	"prettier": "prettier-config-rth",
-	"devDependencies": {
-		"@types/node": "^20.14.9",
-		"@types/upyun": "^3.4.3",
-		"@typescript-eslint/eslint-plugin": "^7.15.0",
-		"@typescript-eslint/parser": "^7.15.0",
-		"eslint": "^8.57.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-config-rth": "^1.4.1",
-		"prettier": "^3.3.2",
-		"prettier-config-rth": "^1.0.0",
-		"typescript": "^5.5.3"
-	},
 	"dependencies": {
 		"upyun": "^3.4.6"
+	},
+	"devDependencies": {
+		"@eslint/eslintrc": "^3.2.0",
+		"@eslint/js": "^9.17.0",
+		"@types/eslint__eslintrc": "^2.1.2",
+		"@types/node": "^22.10.5",
+		"@types/upyun": "^3.4.3",
+		"@typescript-eslint/eslint-plugin": "^8.19.0",
+		"@typescript-eslint/parser": "^8.19.0",
+		"eslint": "^9.17.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-config-rth": "^2.0.0",
+		"prettier": "^3.4.2",
+		"prettier-config-rth": "^1.0.0",
+		"typescript": "^5.7.2"
 	}
 }

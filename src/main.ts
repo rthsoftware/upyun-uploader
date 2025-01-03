@@ -127,7 +127,7 @@ void (async (): Promise<void> => {
 		for (const filename of filesToUpload) {
 			if (
 				isDelayMode &&
-				(filename.endsWith(".html") || filename === "sw.js")
+				(filename.endsWith(".html") || filename.endsWith("sw.js"))
 			) {
 				delayedFiles.push(filename);
 				continue;
