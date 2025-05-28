@@ -11,4 +11,4 @@ export const compat = new FlatCompat({
 	recommendedConfig: js.configs.recommended,
 });
 
-export default [...compat.extends("rth")];
+export default [...compat.extends("@rthsoftware/eslint-config")];

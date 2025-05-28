@@ -1,56 +1,36 @@
 {
-	"name": "upyun-uploader",
-	"version": "1.1.11",
-	"description": "The command-line interface for uploading the selected directory to UPYUN Storage Service.",
+	"name": "@rthsoftware/upyun-uploader",
+	"version": "2.0.0",
 	"type": "module",
 	"main": "dist/main.js",
-	"bin": "dist/main.js",
+	"bin": {
+		"upyun-uploader": "dist/main.js"
+	},
 	"scripts": {
 		"build": "tsc",
-		"clean": "rm -rf ./dist",
+		"clean": "rm -rf dist",
+		"dev": "NODE_ENV=development bun run --bun --watch src/main.ts",
 		"format": "prettier --write .",
 		"lint": "eslint \"src/**/*.ts\" && prettier --check .",
-		"prepare": "npm run build",
-		"start": "npm run build && node ./dist/main.js"
+		"start": "npm run build && node dist/main.js"
 	},
-	"keywords": [
-		"cicd",
-		"cli",
-		"gitlab",
-		"storage",
-		"uploader",
-		"upyun"
-	],
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/shangzhenyang/upyun-uploader.git"
-	},
-	"author": "Shangzhen Yang",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/shangzhenyang/upyun-uploader/issues"
-	},
-	"homepage": "https://github.com/shangzhenyang/upyun-uploader#readme",
 	"files": [
 		"dist"
 	],
-	"prettier": "prettier-config-rth",
 	"dependencies": {
 		"upyun": "^3.4.6"
 	},
 	"devDependencies": {
-		"@eslint/eslintrc": "^3.2.0",
-		"@eslint/js": "^9.17.0",
-		"@types/eslint__eslintrc": "^2.1.2",
-		"@types/node": "^22.10.5",
+		"@eslint/eslintrc": "^3.3.1",
+		"@eslint/js": "^9.27.0",
+		"@rthsoftware/eslint-config": "git+ssh://git@gl.retiehe.com/rthsoftware/eslint-config.git",
+		"@types/node": "^22.15.23",
 		"@types/upyun": "^3.4.3",
-		"@typescript-eslint/eslint-plugin": "^8.19.0",
-		"@typescript-eslint/parser": "^8.19.0",
-		"eslint": "^9.17.0",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-config-rth": "^2.0.0",
-		"prettier": "^3.4.2",
-		"prettier-config-rth": "^1.0.0",
-		"typescript": "^5.7.2"
+		"@typescript-eslint/eslint-plugin": "^8.33.0",
+		"@typescript-eslint/parser": "^8.33.0",
+		"eslint": "^9.27.0",
+		"eslint-config-prettier": "^10.1.5",
+		"prettier": "^3.5.3",
+		"typescript": "^5.8.3"
 	}
 }

@@ -16,7 +16,7 @@ if (process.argv.includes("-v") || process.argv.includes("--version")) {
 	console.info(version);
 	process.exit(0);
 }
-console.info("UPYUN Uploader V" + version);
+console.info("UPYUN Uploader " + version);
 
 if (!BUCKET || !DIRECTORY) {
 	console.error("Usage: upyun-uploader <bucket> <directory>");

@@ -1,5 +1,4 @@
 
-bun.lockb
-dist
+bun.lock*
 node_modules
 .DS_Store
