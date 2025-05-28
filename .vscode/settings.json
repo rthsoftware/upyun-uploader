@@ -14,7 +14,7 @@
 	"files.trimFinalNewlines": true,
 	"files.trimTrailingWhitespace": true,
 	"json.validate.enable": false,
-	"npm.packageManager": "npm",
+	"npm.packageManager": "bun",
 	"typescript.preferences.importModuleSpecifier": "non-relative",
 	"typescript.preferences.importModuleSpecifierEnding": "js",
 	"typescript.updateImportsOnFileMove.enabled": "always",
